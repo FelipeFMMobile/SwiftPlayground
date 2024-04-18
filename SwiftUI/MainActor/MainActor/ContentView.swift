@@ -15,11 +15,11 @@ class ViewModel: ObservableObject {
     func loadValues() async throws {
          Task(priority: .background) {
              do {
-                 print("\(Thread.isMainThread)") // besides the warning, this correctly shows that we are on background thread
+                 print("is mainActor: \(Thread.current)") // besides the warning, this correctly shows that we are on background thread
                  try await Task.sleep(nanoseconds: 3 * 1_000_000_000)
                  await MainActor.run {
                      // without update the value on main thread, xcode will trigger a error indicating that cannot be peformed.
-                     print("mainActor: \(Thread.isMainThread)")
+                     print("is mainActor: \(Thread.isMainThread)")
                      isLoaded = true
                  }
              } catch {
