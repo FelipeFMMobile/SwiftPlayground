@@ -86,7 +86,7 @@ struct ContentView: View {
         .padding()
         .task {
             do {
-                for _ in 0...10 {
+                for _ in 0...100 {
                     try await viewModel.loadValues()
                     try await viewModel.loadValues2()
                 }
