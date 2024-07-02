@@ -10,6 +10,8 @@ import SwiftUI
 // We have a viewModel thats control UI updates
 class ViewModel: ObservableObject {
     @Published var isLoaded: Bool = false
+    @Published var myImage: UIImage = UIImage()
+    let appleLogoURL = URL(string: "https://1000logos.net/wp-content/uploads/2016/10/Apple-Logo.png")!
     // creates a function that wait 3 seconds and and turn to true
     // @MainActor - if we put this annotation here, all code will run on mainthread!
     func loadValues() async throws {
@@ -34,7 +36,17 @@ class ViewModel: ObservableObject {
          }
     }
 
-    private func printThread() {
+    @MainActor
+    func fetchImage() async {
+        let data = try? await URLSession.shared.data(from: appleLogoURL).0
+        guard let data, let image = UIImage(data: data) else {
+            return
+        }
+        self.myImage = image
+        printThread()
+    }
+
+    func printThread() {
         print("thread: \(Thread.current)")
         print("isMain: \(Thread.current.isMainThread)")
         print("----")
@@ -48,6 +60,10 @@ struct LoadView: View {
         VStack(alignment: .trailing) {
             Text("View isLoaded ?")
             Text("\(viewModel.isLoaded)").bold()
+            Image(uiImage: viewModel.myImage)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width:100, height:100)
             Button {
                 print("Clicked me!")
             } label: {
@@ -55,13 +71,18 @@ struct LoadView: View {
             }
 
         }.padding(4.0)
-            .task {
-                do {
-                    try await viewModel.loadValues()
-                } catch {
-                    
-                }
+        .task {
+//            do {
+//                try await viewModel.loadValues()
+//            } catch {
+//                
+//            }
+        }.onAppear {
+            Task {
+                await self.viewModel.fetchImage()
             }
+            
+        }
     }
 }
 
