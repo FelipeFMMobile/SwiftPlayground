@@ -63,6 +63,7 @@ struct PetsView: View {
 struct PetsCouterView: View {
     // The key point is, when myPets change the State of view
     // SwiftUI will redraw everything
+    // Hierarchy: PetsCounterView --> PetsView --> PetsViewModel
     @State var observation = ""
     var body: some View {
         VStack {
@@ -74,8 +75,10 @@ struct PetsCouterView: View {
                     Section {
                         PetsView()
                     }
-                    TextField("Observation: ",
+                    TextField("type a observation: ",
                               text: $observation)
+                    Text("ObservedObject: will clear the list. StateObject: will not clear the list")
+                        .font(.caption)
                 }
             }.padding(.bottom)
         }
