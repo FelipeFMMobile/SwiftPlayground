@@ -113,10 +113,17 @@ class NetworkRequesterSolid_3 {
         self.response = response
     }
 
-    func fetchFromURL() async throws -> some Decodable {
+    func fetch<T: Decodable>(_ type: T.Type) async throws -> some Decodable {
         guard let url = URL(string: params.domain + params.path) else { throw NSError() }
         let data = try await URLSession.shared.data(from: url).0
-        return try await self.response.process(data, type: JsonModel.self)
+        return try await self.response.process(data, type: type)
+   }
+}
+    
+extension NetworkRequesterSolid_3 {
+    func fetchFromURL<T: Decodable>(_ type: T.Type) async throws -> some Decodable {
+        self.response = ResponseJSONAdapter()
+        return try await fetch(type)
    }
 }
 // Great! Now using OCP, any class that conforms to ResponseAdapterProtocol can be injected into our requester.
@@ -198,8 +205,7 @@ class NetworkRequesterSolid_5: NetworkRequesterSolid_4 {
 
 extension NetworkRequesterSolid_5: NetworkRequesterSolidProtocol {
     // Instead, let's create a protocol that uses generalization to handle both classes with one signature.
-    // At this point, NetworkRequesterSolid_4 could use NetworkRequesterSolidProtocol and, if preferred,
-    // be fixed to JsonModel there.
+    // At this point, NetworkRequesterSolid_4 remains unchanged and now the child has a new method
     func fetchFromURL<T: Decodable>(_ type: T.Type) async throws -> T
     {
         guard let url = URL(string: params.domain + params.path) else { throw NSError() }
